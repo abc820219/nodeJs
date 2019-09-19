@@ -1,0 +1,31 @@
+0918
+class Person {
+    constructor(name = 'noname', age = 20) 
+    { this.name = name; this.age = age; }
+    }
+module.exports = Person; 
+const Person = require('./person');
+
+0919
+const http = require('http'),
+fs = require('fs');
+http.createServer((req, res) => {
+    fs.writeFile(__dirname + '/header01.json', JSON.stringify(req.headers), error => {
+        if (error) {
+            return console.log('error');
+        } else {
+            console.log(JSON.stringify(req.headers));
+        }
+    })
+}).listen(3001);
+
+listen
+set
+get
+render
+use
+status
+type
+
+
+

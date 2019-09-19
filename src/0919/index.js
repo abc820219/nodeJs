@@ -3,8 +3,11 @@ var express = require('express')
 //啟動
 var app = express();
 
-
 app.set('view engine', 'ejs');
+
+app.get('/',function(req,res){//根目錄
+    res.render('home',{name:'jason'});
+})
 
 //啟動靜態資料夾
 app.use(express.static(__dirname + '/../public'));
@@ -12,7 +15,7 @@ app.use(express.static(__dirname + '/../public'));
 
 //設定路由1號 2號
 app.get('/get1', function (req, res) {
-    res.render('home', { name: 'jason' });
+    res.send('hello1');
 });
 
 app.get('/get2', function (req, res) {
@@ -28,5 +31,5 @@ app.use((req, res) => {
 
 //給一個空間3000不能重複啟動
 app.listen(3000, function () {
-    console.log('3000p');
+    console.log('http://localhost:3000/');
 });
