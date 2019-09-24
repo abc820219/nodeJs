@@ -67,28 +67,51 @@ app.get('/get2', function (req, res) {
     res.send('hello2');
 });
 
-app.post('/upload', upload.single('avatar'), (req, res) => {//單張圖片上傳
-    console.log(req.file);
-    // res.send('yes');
-    if (req.file && req.file.originalname) {
-        switch (req.file.mimetype) {
-            case "image/jpg":
+
+app.get('/upload', (req, res) => {
+    res.render('upload');
+})
+//單圖
+app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上傳
+    console.log(req.files);
+    let arrayS = [];
+    // res.json(req.files);
+    for (let i in req.files) {
+        switch (req.files[i].mimetype) {
             case "image/png":
             case "image/jpeg":
-                fs.createReadStream(req.file.path)//讀檔案
+            case "image/jpg":
+                fs.createReadStream(req.files[i].path)//讀檔案
                     .pipe(//串進去
-                        fs.createReadStream('./public/img/' + req.file.originalname)//寫檔案
+                        fs.createWriteStream('public/img/' + req.files[i].originalname)//寫檔案
                     );
-                res.send('good boy');
+                arrayS.push(req.files[i].originalname)
                 break;
             default:
-                return res.send('bad boy')
         }
-    } else {
-        return res.send('bad bad boy')
     }
+    res.json(arrayS);
+    // console.log(arrayS);
 });
 
+//多圖
+// if (req.file && req.file.originalname) {
+// switch (req.file.mimetype) {
+//     case "image/png":
+//     case "image/jpeg":
+//     case "image/jpg":
+//         res.json(req.file);
+//         fs.createReadStream(req.file.path)//讀檔案
+//             .pipe(//串進去
+//                 fs.createWriteStream('public/img/' + req.file.originalname)//寫檔案
+//             );
+
+//         break;
+//     default:
+// }
+// } else {
+//     res.send('87')
+// }
 
 
 //沒有別的路由啟動時啟動這個

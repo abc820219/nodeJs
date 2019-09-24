@@ -12,38 +12,31 @@
 <body>
     <div id="info"></div>
     <button>click</button>
-    <button id="btn2">click</button>
+    <!-- <button id="btn2">click</button> -->
 </body>
 <script>
     var b;
     var a;
-    $('button').on('click', function () {
-        console.log('fetch');
-        var obj = {
-            "name": "jason",
-        }
+    $('button').click(function () {
+        console.log('click!');
+        const obj = {
+            name: 'peter',
+            age: 20
+        };
         fetch('/try-post-form2', {
             body: JSON.stringify(obj),
             headers: {
                 'content-type': 'application/json'
             },
             method: 'POST'
-        }).then(res => {
-            res.json();
-            b = res;
-        }).then(json => {
-            // console.log(json);
-            $('#info').text(JSON.stringify(json));
-            return a = json;
-
         })
+            .then(response => {
+                return response.json();
+            })
+            .then(obj => {
+                $('#info').text(JSON.stringify(obj))
+            });
     });
-    $('#btn2').click(function () {
-
-        console.log('aa' + b);
-    })
-
-
 </script>
 
 </html>
