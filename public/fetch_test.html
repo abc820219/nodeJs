@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <script src="lib/jquery-3.4.1.js"></script>
+    <title>Document</title>
+</head>
+
+<body>
+    <div id="info"></div>
+    <button>click</button>
+    <!-- <button id="btn2">click</button> -->
+</body>
+<script>
+    var b;
+    var a;
+    $('button').click(function () {
+        console.log('click!');
+        const obj = {
+            name: 'peter',
+            age: 20
+        };
+        fetch('/try-post-form2', {
+            body: JSON.stringify(obj),
+            headers: {
+                'content-type': 'application/json'
+            },
+            method: 'POST'
+        })
+            .then(response => {
+                return response.json();
+            })
+            .then(obj => {
+                $('#info').text(JSON.stringify(obj))
+            });
+    });
+</script>
+
+</html>
