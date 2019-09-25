@@ -5,8 +5,18 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'tmp_uploads' });
 const fs = require('fs');
+const admin1 = require(__dirname + '/admins/admin1');
+const mysql = require('mysql');
 
 //啟動
+var db = mysql.createConnection({
+    host: 'localhost',
+    user: 'jason',
+    password: 'z27089433',
+    database: 'mytest'
+});
+db.connect();
+
 var app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
@@ -16,6 +26,8 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(require(__dirname + '/admins/admin2'));
+app.use('/admin3', require(__dirname + '/admins/admin3'));//送一個根目錄
 
 
 app.get('/', function (req, res) {//根目錄
@@ -71,11 +83,10 @@ app.get('/get2', function (req, res) {
 app.get('/upload', (req, res) => {
     res.render('upload');
 })
-//單圖
+//多圖
 app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上傳
     console.log(req.files);
     let arrayS = [];
-    // res.json(req.files);
     for (let i in req.files) {
         switch (req.files[i].mimetype) {
             case "image/png":
@@ -91,10 +102,10 @@ app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上�
         }
     }
     res.json(arrayS);
-    // console.log(arrayS);
 });
 
-//多圖
+// 單圖
+// app.post('/upload', upload.single('avatar'), (req, res) => {//單張圖片上傳
 // if (req.file && req.file.originalname) {
 // switch (req.file.mimetype) {
 //     case "image/png":
@@ -105,14 +116,45 @@ app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上�
 //             .pipe(//串進去
 //                 fs.createWriteStream('public/img/' + req.file.originalname)//寫檔案
 //             );
-
 //         break;
 //     default:
 // }
 // } else {
 //     res.send('87')
 // }
+// });
 
+//?可填可不填,:可以自己指定值給自己定義的 屬性,*變成屬性變成索引
+app.get('/my-params1/:action/:id', (req, res) => {
+    res.json(req.params);
+});
+app.get('/my-params2/:action?/:id?', (req, res) => {
+    res.json(req.params);
+});
+app.get('/my-params3/*/*', (req, res) => {
+    res.json(req.params);
+});
+
+app.get(/^\/09\d{2}\-?\d{3}\d{3}$/, (req, res) => {
+    let str = req.url.slice(1);
+    str = str.split('-').join('');
+    str = str.split('?')[0];
+    console.log(str.length);
+    // res.send('tel:' + str.slice(0, 10));
+    res.send('tel:' + str);
+});
+
+//連線資料庫
+app.get('/test_list', (req, res) => {
+    var sql = "SELECT * FROM `members`";
+    db.query(sql, (error, results) => {
+        if (error) throw error;
+        console.log(results);
+        res.json(results);
+    });
+});
+
+admin1(app);
 
 //沒有別的路由啟動時啟動這個
 app.use((req, res) => {
@@ -124,6 +166,6 @@ app.use((req, res) => {
 
 
 //給一個空間3000不能重複啟動
-app.listen(3000, function () {
-    console.log('已經啟動:http://localhost:3000/');
+app.listen(3001, function () {
+    console.log('已經啟動:http://localhost:3001/');
 });

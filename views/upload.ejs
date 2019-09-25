@@ -27,10 +27,13 @@
             })
             .then(obj => {
                 console.log(obj);
-                $('#imgDiv').append(` 
-            <img src="./img/${obj.originalname}" alt=""> 
+                for (let k in obj) {
+                    $('#imgDiv').append(` 
+            <img src="./img/${obj[k]}" alt=""> 
             </br>
-             <div>${obj.originalname}</div>`)
+             <div>${obj[k]}</div>`)
+                }
+
             });
     });
 </script>
