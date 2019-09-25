@@ -22,7 +22,7 @@ const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.set('view engine', 'ejs');
 
-//middle ware 啟動靜態資料夾 & 判斷如果是GET以外的方法就解析的函式要安裝QS才能用true & 接收表單傳進來的JSON時轉譯JSON
+//middle ware 啟動靜態資料夾 & 判斷如果是GET以外的方法就解析的函式要安裝QS才能用true & 接收表單傳進來的JSON時解析JSON
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
