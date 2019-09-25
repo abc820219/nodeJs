@@ -9,20 +9,20 @@ const admin1 = require(__dirname + '/admins/admin1');
 const mysql = require('mysql');
 
 //啟動
-var db = mysql.createConnection({
-    host: 'localhost',
-    user: 'jason',
-    password: 'z27089433',
-    database: 'mytest'
-});
-db.connect();
+// var db = mysql.createConnection({
+//     host: 'localhost',
+//     user: 'jason',
+//     password: 'z27089433',
+//     database: 'mytest'
+// });
+// db.connect();
 
 var app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.set('view engine', 'ejs');
 
-//middle ware 啟動靜態資料夾 & 轉譯 & 轉譯JSON
+//middle ware 啟動靜態資料夾 & 判斷如果是GET以外的方法就解析的函式要安裝QS才能用true & 轉譯JSON
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -64,7 +64,6 @@ app.post('/try-post-form', (req, res) => {
 
 app.get('/try-post-form2', (req, res) => {
     res.send('get try-post-form');
-
 });
 app.post('/try-post-form2', (req, res) => {
     res.send(req.body);
@@ -124,7 +123,7 @@ app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上�
 // }
 // });
 
-//?可填可不填,:可以自己指定值給自己定義的 屬性,*變成屬性變成索引
+//?可填可不填,:可以自己指定值給自己定義的屬性,*變成屬性變成索引
 app.get('/my-params1/:action/:id', (req, res) => {
     res.json(req.params);
 });
@@ -139,7 +138,7 @@ app.get(/^\/09\d{2}\-?\d{3}\d{3}$/, (req, res) => {
     let str = req.url.slice(1);
     str = str.split('-').join('');
     str = str.split('?')[0];
-    console.log(str.length);
+    console.log(str);
     // res.send('tel:' + str.slice(0, 10));
     res.send('tel:' + str);
 });
@@ -167,5 +166,5 @@ app.use((req, res) => {
 
 //給一個空間3000不能重複啟動
 app.listen(3001, function () {
-    console.log('已經啟動:http://localhost:3001/');
+    console.log('已經啟動:localhost:3001');
 });
