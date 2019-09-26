@@ -6,29 +6,40 @@ const multer = require('multer');
 const upload = multer({ dest: 'tmp_uploads' });
 const fs = require('fs');
 const admin1 = require(__dirname + '/admins/admin1');
+const session = require('express-session');
 const mysql = require('mysql');
+const moment = require('moment-timezone');
 
 //啟動
-// var db = mysql.createConnection({
-//     host: 'localhost',
-//     user: 'jason',
-//     password: 'z27089433',
-//     database: 'mytest'
-// });
-// db.connect();
+var db = mysql.createConnection({
+    host: 'localhost',
+    user: 'jason',
+    password: 'z27089433',
+    database: 'mytest'
+});
+db.connect();
 
 var app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
 
 app.set('view engine', 'ejs');
 
-//middle ware 啟動靜態資料夾 & 判斷如果是GET以外的方法就解析的函式要安裝QS才能用true & 接收表單傳進來的JSON時解析JSON
+//middle ware 啟動靜態資料夾 & 轉譯 & 轉譯JSON
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(require(__dirname + '/admins/admin2'));
 app.use('/admin3', require(__dirname + '/admins/admin3'));//送一個根目錄
-
+app.use(session({
+    //上面兩個未來預設可能會變成true先設定好
+    saveUninitialized: false,
+    resave: false,
+    secret: '69',
+    //存活時間cookie底下才有session
+    cookie: {
+        maxAge: 1200000,
+    }
+}));
 
 app.get('/', function (req, res) {//根目錄
     res.render('home', { name: 'jason' });
@@ -64,6 +75,7 @@ app.post('/try-post-form', (req, res) => {
 
 app.get('/try-post-form2', (req, res) => {
     res.send('get try-post-form');
+
 });
 app.post('/try-post-form2', (req, res) => {
     res.send(req.body);
@@ -123,7 +135,7 @@ app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上�
 // }
 // });
 
-//?可填可不填,:可以自己指定值給自己定義的屬性,*變成屬性變成索引
+//?可填可不填,:可以自己指定值給自己定義的 屬性,*變成屬性變成索引
 app.get('/my-params1/:action/:id', (req, res) => {
     res.json(req.params);
 });
@@ -138,19 +150,53 @@ app.get(/^\/09\d{2}\-?\d{3}\d{3}$/, (req, res) => {
     let str = req.url.slice(1);
     str = str.split('-').join('');
     str = str.split('?')[0];
-    console.log(str);
+    console.log(str.length);
     // res.send('tel:' + str.slice(0, 10));
     res.send('tel:' + str);
 });
+//SESSION測試
+app.get('/try-session', (req, res) => {
+    req.session.my_views = req.session.my_views || 0;
+    req.session.my_views++;
+    res.json({
+        guest: "guest",
+        "guestNumber": req.session.my_views
+    });
+});
+
+//moment測試
+app.get('/try-moment', (req, res) => {
+    const myFormat = 'YYYY-MM-DD HH:mm:ss';
+    const exp = req.session.cookie.expires;
+    const mo1 = moment(exp);
+    const mo2 = moment(new Date());
+    res.contentType('text/plain');
+    res.write(exp + "\n");
+    res.write(new Date() + "\n");
+    res.write('台灣現在:' + mo2.format(myFormat) + "\n");
+    res.write('台灣session到期:' + mo1.format(myFormat) + "\n");
+    res.write('東京現在' + mo2.tz('Asia / Tokyo').format(myFormat) + "\n");
+    res.write('東京session到期:' + mo1.tz('Asia / Tokyo').format(myFormat) + "\n");
+    res.end('');
+})
+
+
 
 //連線資料庫
 app.get('/test_list', (req, res) => {
-    var sql = "SELECT * FROM `members`";
-    db.query(sql, (error, results) => {
+    var sql = "SELECT * FROM `address_book` LIMIT 0,3";
+    db.query(sql, (error, results, fields) => {
         if (error) throw error;
-        console.log(results);
-        res.json(results);
+        console.log(fields);
+        // res.json(results);
+        for (let v of results) {
+            v.birthday = moment(v.birthday).format('YYYY-MM-DD');
+        }
+        res.render('test_list', {
+            array: results
+        });
     });
+
 });
 
 admin1(app);
@@ -162,9 +208,7 @@ app.use((req, res) => {
     res.send(`404`);
 });
 
-
-
 //給一個空間3000不能重複啟動
-app.listen(3001, function () {
-    console.log('已經啟動:localhost:3001');
+app.listen(3000, function () {
+    console.log('已經啟動:http://localhost:3000/');
 });

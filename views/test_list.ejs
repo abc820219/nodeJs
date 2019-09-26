@@ -1,3 +1,26 @@
+<%- include('parts/html_head') %>
+<%- include('parts/navbar') %>
+<div class="container">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">name</th>
+                <th scope="col">
+                    address
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <% 
+            for (let v of array)  { %>
+            <tr>
+                <td><%= v.name%></td>
+                <td><%= v.birthday%></td>
+            </tr> <%}%>
+        </tbody>
+    </table>
+</div>
 <script>
-console.log()
+
 </script>
+<%- include('parts/html_foot') %>
