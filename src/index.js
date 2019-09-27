@@ -9,7 +9,8 @@ const admin1 = require(__dirname + '/admins/admin1');
 const session = require('express-session');
 const mysql = require('mysql');
 const moment = require('moment-timezone');
-
+const bluebird = require('bluebird');
+const cors = require('cors');
 //啟動
 var db = mysql.createConnection({
     host: 'localhost',
@@ -18,10 +19,9 @@ var db = mysql.createConnection({
     database: 'mytest'
 });
 db.connect();
-
+bluebird.promisifyAll(db);
 var app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
-
 app.set('view engine', 'ejs');
 
 //middle ware 啟動靜態資料夾 & 轉譯 & 轉譯JSON
@@ -40,13 +40,15 @@ app.use(session({
         maxAge: 1200000,
     }
 }));
+app.use(cors());
 
+
+
+//設定路由
 app.get('/', function (req, res) {//根目錄
     res.render('home', { name: 'jason' });
 })
 
-
-//設定路由
 app.get('/0920sale', function (req, res) {
     const data = require(__dirname + './../data/0920sale.json');
     res.render('0920sale', {
@@ -94,6 +96,7 @@ app.get('/get2', function (req, res) {
 app.get('/upload', (req, res) => {
     res.render('upload');
 })
+
 //多圖
 app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上傳
     console.log(req.files);
@@ -139,9 +142,11 @@ app.post('/upload', upload.array('avatar', 2), (req, res) => {//單張圖片上�
 app.get('/my-params1/:action/:id', (req, res) => {
     res.json(req.params);
 });
+
 app.get('/my-params2/:action?/:id?', (req, res) => {
     res.json(req.params);
 });
+
 app.get('/my-params3/*/*', (req, res) => {
     res.json(req.params);
 });
@@ -164,6 +169,14 @@ app.get('/try-session', (req, res) => {
     });
 });
 
+app.get('/try-session2', (req, res) => {
+    req.session.my_views = req.session.my_views || 0;
+    req.session.my_views++;
+    res.json({
+        views: req.session.my_views,
+    });
+});
+
 //moment測試
 app.get('/try-moment', (req, res) => {
     const myFormat = 'YYYY-MM-DD HH:mm:ss';
@@ -180,12 +193,10 @@ app.get('/try-moment', (req, res) => {
     res.end('');
 })
 
-
-
 //連線資料庫
 app.get('/test_list', (req, res) => {
-    var sql = "SELECT * FROM `address_book` LIMIT 0,3";
-    db.query(sql, (error, results, fields) => {
+    var sql = "SELECT * FROM `address_book` WHERE NAME LIKE ? LIMIT 0,100";
+    db.query(sql, ["%王大明%"], (error, results, fields) => {
         if (error) throw error;
         console.log(fields);
         // res.json(results);
@@ -199,7 +210,32 @@ app.get('/test_list', (req, res) => {
 
 });
 
+//queryAsync&promise
+app.get('/promise/:page?', (req, res) => {
+    let sql = "SELECT COUNT(1) total FROM `address_book`";
+    let page = req.params.page || 1;//url後面的值
+    let perPage = 5;//要幾筆
+    let obj = {};
+    let sqlPage = `SELECT * FROM address_book LIMIT ${(page - 1) * perPage},${perPage}`;//0-5
+    db.queryAsync(sql)
+        .then(results => {
+            obj.total = results[0].total;
+            return db.queryAsync(sqlPage);
+        })
+        .then(results => {
+            obj.rows = results;
+            res.json(obj);
+        })
+        .catch(error => {
+            console.log(error);
+            res.send(error);
+        });
+});
+
 admin1(app);
+
+//promis test
+app.get('/tr')
 
 //沒有別的路由啟動時啟動這個
 app.use((req, res) => {
