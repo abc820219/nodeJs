@@ -12,13 +12,11 @@ const moment = require('moment-timezone');
 const bluebird = require('bluebird');
 const cors = require('cors');
 //啟動
-var db = mysql.createConnection({
-    host: 'localhost',
-    user: 'jason',
-    password: 'z27089433',
-    database: 'mytest'
-});
-db.connect();
+var file = 'C:/__connect_db.json';
+var db_Obj = JSON.parse(fs.readFileSync(file));
+var db = mysql.createConnection(db_Obj);
+
+
 bluebird.promisifyAll(db);
 var app = express();
 const urlencodedParser = bodyParser.urlencoded({ extended: false });
