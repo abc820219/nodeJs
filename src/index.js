@@ -3,19 +3,19 @@ const express = require('express')
 const url = require('url');
 const bodyParser = require('body-parser');
 const multer = require('multer');
-const upload = multer({ dest: 'tmp_uploads' });
-const fs = require('fs');
+const upload = multer({ dest: 'tmp_uploads' });//設定檔案暫存目錄
+const fs = require('fs');//讀檔案寫檔案
 const admin1 = require(__dirname + '/admins/admin1');
 const session = require('express-session');
 const mysql = require('mysql');
 const moment = require('moment-timezone');
 const bluebird = require('bluebird');
-const cors = require('cors');
+const cors = require('cors');//開放網域
 //啟動
 var file = 'C:/__connect_db.json';
 var db_Obj = JSON.parse(fs.readFileSync(file));
 var db = mysql.createConnection(db_Obj);
-
+db.connect();
 
 bluebird.promisifyAll(db);
 var app = express();
@@ -25,7 +25,7 @@ app.set('view engine', 'ejs');
 //middle ware 啟動靜態資料夾 & 轉譯 & 轉譯JSON
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(bodyParser.json());//解析JSON
 app.use(require(__dirname + '/admins/admin2'));
 app.use('/admin3', require(__dirname + '/admins/admin3'));//送一個根目錄
 app.use(session({
@@ -152,7 +152,7 @@ app.get('/my-params3/*/*', (req, res) => {
 app.get(/^\/09\d{2}\-?\d{3}\d{3}$/, (req, res) => {
     let str = req.url.slice(1);
     str = str.split('-').join('');
-    str = str.split('?')[0];
+    str = str.split('?')[0];//切兩段拿前面那段
     console.log(str.length);
     // res.send('tel:' + str.slice(0, 10));
     res.send('tel:' + str);
@@ -194,7 +194,7 @@ app.get('/try-moment', (req, res) => {
 //連線資料庫
 app.get('/test_list', (req, res) => {
     var sql = "SELECT * FROM `address_book` WHERE NAME LIKE ? LIMIT 0,100";
-    db.query(sql, ["%王大明%"], (error, results, fields) => {
+    db.query(sql, ["%%"], (error, results, fields) => {
         if (error) throw error;
         console.log(fields);
         // res.json(results);
@@ -204,8 +204,7 @@ app.get('/test_list', (req, res) => {
         res.render('test_list', {
             array: results
         });
-    });
-
+    }); 
 });
 
 //queryAsync&promise
@@ -231,9 +230,6 @@ app.get('/promise/:page?', (req, res) => {
 });
 
 admin1(app);
-
-//promis test
-app.get('/tr')
 
 //沒有別的路由啟動時啟動這個
 app.use((req, res) => {
