@@ -5,7 +5,6 @@ const bodyParser = require('body-parser');
 const multer = require('multer');
 const upload = multer({ dest: 'tmp_uploads' });//設定檔案暫存目錄
 const fs = require('fs');//讀檔案寫檔案
-const admin1 = require(__dirname + '/admins/admin1');
 const session = require('express-session');
 const mysql = require('mysql');
 const moment = require('moment-timezone');
@@ -229,7 +228,9 @@ app.get('/promise/:page?', (req, res) => {
         });
 });
 
-admin1(app);
+
+const admin1 = require(__dirname + '/admins/admin1');//引入路由
+admin1(app);//啟動
 
 //沒有別的路由啟動時啟動這個
 app.use((req, res) => {
