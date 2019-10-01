@@ -37,7 +37,22 @@ app.use(session({
         maxAge: 1200000,
     }
 }));
-app.use(cors());
+
+const whitelist = ['http://localhost:5000', undefined];
+var corsOptions = {
+    credentials: true,
+    origin: function (origin, callback) {
+        console.log('origin:' + origin);
+        if (whitelist.indexOf(origin) >= 0) {
+            callback(null, true)
+        } else {
+            callback(new Error('noWhitelist'));
+        }
+    }
+}
+app.use(cors(corsOptions));
+// app.use(cors());
+
 
 
 
@@ -203,7 +218,7 @@ app.get('/test_list', (req, res) => {
         res.render('test_list', {
             array: results
         });
-    }); 
+    });
 });
 
 //queryAsync&promise

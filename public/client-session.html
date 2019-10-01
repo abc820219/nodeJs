@@ -10,7 +10,10 @@
     <div id="info"></div>
 
     <script>
-        fetch('http://localhost:3000/try-session2')
+        fetch('http://localhost:3000/try-session2',{
+            method:"GET",
+            credentials:'include'
+        })
             .then(response => {
                 return response.text();
             })
