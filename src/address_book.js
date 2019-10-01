@@ -16,6 +16,8 @@ router.get('/:page?/:keyword?', (req, res) => {
     output.params = req.params;//url
     output.perPage = perPage;//10筆
     let page = parseInt(req.params.page) || 1;
+    
+    console.log(origin);
     let keyword = output.params.keyword || "";
     let where = "WHERE 1"
     if (keyword) {
