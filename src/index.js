@@ -11,8 +11,9 @@ const moment = require('moment-timezone');
 const bluebird = require('bluebird');
 const cors = require('cors');//開放網域
 //啟動
-var file = 'C:/__connect_db.json';
-var db_Obj = JSON.parse(fs.readFileSync(file));
+// var file = 'C:/__connect_db.json';
+// var db_Obj = JSON.parse(fs.readFileSync(file));
+var db_Obj = require('C:/__connect_db.json');
 var db = mysql.createConnection(db_Obj);
 db.connect();
 
@@ -27,6 +28,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());//解析JSON
 app.use(require(__dirname + '/admins/admin2'));
 app.use('/admin3', require(__dirname + '/admins/admin3'));//送一個根目錄
+express.aaaa = "aaaa";//下面那隻可以得到這個
+app.use('/address_book', require(__dirname + '/address_book'));
 app.use(session({
     //上面兩個未來預設可能會變成true先設定好
     saveUninitialized: false,
@@ -44,9 +47,10 @@ var corsOptions = {
     origin: function (origin, callback) {
         console.log('origin:' + origin);
         if (whitelist.indexOf(origin) >= 0) {
-            callback(null, true)
+            callback(null, true)//前面放錯誤物件,後面布林值0或1 0不允許
         } else {
-            callback(new Error('noWhitelist'));
+            callback(new Error('noWhitelist'));//會讓SERVER停下
+            callback(new Error('noWhitelist'), false)//前面放錯誤物件,後面布林值0或1 1允許
         }
     }
 }
@@ -71,7 +75,6 @@ app.get('/0920sale', function (req, res) {
 app.get('/try-qs', (req, res) => {
     const urlParts = url.parse(req.url, true);
     console.log(urlParts);
-
     res.render('try-qs', {
         query: urlParts.query
     });
@@ -251,7 +254,7 @@ admin1(app);//啟動
 app.use((req, res) => {
     res.type('text/plain');
     res.status(404);
-    res.send(`404`);
+    res.send(`404:路由錯誤`);
 });
 
 //給一個空間3000不能重複啟動
